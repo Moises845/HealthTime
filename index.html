@@ -25,6 +25,55 @@
         <!-- Botón para configurar el recordatorio -->
         <button id="set-reminder-btn">Configurar Recordatorio</button>
     </div>
-    <script src="script.js"></script>
+    <script>
+        document.getElementById('set-reminder-btn').addEventListener('click', function() {
+            // Obtener los valores del formulario
+            var medicineName = document.getElementById('medicine-name').value;
+            var reminderDate = document.getElementById('reminder-date').value;
+            var reminderTime = document.getElementById('reminder-time').value;
+
+            // Crear la fecha y hora del recordatorio combinadas
+            var reminderDateTime = new Date(reminderDate + 'T' + reminderTime);
+
+            // Obtener la fecha y hora actual
+            var now = new Date();
+
+            // Verificar si la fecha y hora del recordatorio es en el futuro
+            if (reminderDateTime > now) {
+                // Calcular el tiempo en milisegundos hasta el recordatorio
+                var timeUntilReminder = reminderDateTime.getTime() - now.getTime();
+
+                // Programar la notificación para que se muestre en la fecha y hora del recordatorio
+                setTimeout(function() {
+                    // Verificar si el navegador soporta notificaciones push
+                    if ('Notification' in window) {
+                        // Solicitar permiso para enviar notificaciones
+                        Notification.requestPermission().then(function(permission) {
+                            // Verificar si se concedió el permiso
+                            if (permission === 'granted') {
+                                // Crear la notificación
+                                var notification = new Notification('¡Hora de tomar tu medicamento!', {
+                                    body: 'No olvides tomar ' + medicineName + '.',
+                                    icon: 'icon.png' // URL de la imagen del icono (puedes cambiar esto)
+                                });
+
+                                // Programar la notificación para que se cierre después de 10 segundos
+                                setTimeout(notification.close.bind(notification), 10000);
+                            }
+                        });
+                    } else {
+                        alert('Tu navegador no soporta notificaciones push.');
+                    }
+                }, timeUntilReminder);
+
+                // Limpiar los campos del formulario
+                document.getElementById('medicine-name').value = '';
+                document.getElementById('reminder-date').value = '';
+                document.getElementById('reminder-time').value = '';
+            } else {
+                alert('La fecha y hora del recordatorio debe ser en el futuro.');
+            }
+        });
+    </script>
 </body>
 </html>
